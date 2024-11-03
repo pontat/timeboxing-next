@@ -3,7 +3,8 @@
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { CheckIcon, PauseIcon, PlayIcon, PlusIcon, TrashIcon } from 'lucide-react'
+import { PauseIcon, PlayIcon, PlusIcon, TrashIcon } from 'lucide-react'
+import { NextPage } from 'next'
 import { useEffect, useState } from 'react'
 
 type Task = {
@@ -14,7 +15,7 @@ type Task = {
   status: 'idle' | 'running' | 'paused' | 'completed'
 }
 
-export default function TimeboxTodo() {
+const Page: NextPage = () => {
   const [tasks, setTasks] = useState<Task[]>([])
   const [newTaskTitle, setNewTaskTitle] = useState('')
   const [newTaskDuration, setNewTaskDuration] = useState('')
@@ -69,7 +70,7 @@ export default function TimeboxTodo() {
 
   return (
     <div className="container mx-auto max-w-2xl p-4">
-      <h1 className="mb-4 text-2xl font-bold">タイムボックス TODO</h1>
+      <h1 className="mb-4 text-2xl font-bold">タイムボックス</h1>
       <div className="mb-4 flex gap-2">
         <Input
           type="text"
@@ -110,9 +111,9 @@ export default function TimeboxTodo() {
                           <PauseIcon className="h-4 w-4" />
                         </Button>
                       )}
-                      <Button size="sm" onClick={() => updateTaskStatus(task.id, 'completed')}>
+                      {/* <Button size="sm" onClick={() => updateTaskStatus(task.id, 'completed')}>
                         <CheckIcon className="h-4 w-4" />
-                      </Button>
+                      </Button> */}
                     </>
                   )}
                   <Button size="sm" variant="destructive" onClick={() => deleteTask(task.id)}>
@@ -127,3 +128,5 @@ export default function TimeboxTodo() {
     </div>
   )
 }
+
+export default Page
