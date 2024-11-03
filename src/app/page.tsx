@@ -1,10 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { PlayIcon, PauseIcon, CheckIcon, TrashIcon, PlusIcon } from 'lucide-react'
+import { Input } from '@/components/ui/input'
+import { CheckIcon, PauseIcon, PlayIcon, PlusIcon, TrashIcon } from 'lucide-react'
+import { useEffect, useState } from 'react'
 
 type Task = {
   id: number
