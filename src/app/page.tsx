@@ -1,70 +1,129 @@
-import Image from 'next/image'
+'use client'
 
-export default function Home() {
+import { useState, useEffect } from 'react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { PlayIcon, PauseIcon, CheckIcon, TrashIcon, PlusIcon } from 'lucide-react'
+
+type Task = {
+  id: number
+  title: string
+  duration: number
+  remainingTime: number
+  status: 'idle' | 'running' | 'paused' | 'completed'
+}
+
+export default function TimeboxTodo() {
+  const [tasks, setTasks] = useState<Task[]>([])
+  const [newTaskTitle, setNewTaskTitle] = useState('')
+  const [newTaskDuration, setNewTaskDuration] = useState('')
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTasks((prevTasks) =>
+        prevTasks.map((task) =>
+          task.status === 'running' && task.remainingTime > 0
+            ? { ...task, remainingTime: task.remainingTime - 1 }
+            : task.status === 'running' && task.remainingTime <= 0
+              ? { ...task, status: 'completed' }
+              : task,
+        ),
+      )
+    }, 1000)
+
+    return () => clearInterval(timer)
+  }, [])
+
+  const addTask = () => {
+    if (newTaskTitle && newTaskDuration) {
+      const duration = parseInt(newTaskDuration)
+      setTasks([
+        ...tasks,
+        {
+          id: Date.now(),
+          title: newTaskTitle,
+          duration: duration * 60,
+          remainingTime: duration * 60,
+          status: 'idle',
+        },
+      ])
+      setNewTaskTitle('')
+      setNewTaskDuration('')
+    }
+  }
+
+  const updateTaskStatus = (id: number, status: Task['status']) => {
+    setTasks(tasks.map((task) => (task.id === id ? { ...task, status } : task)))
+  }
+
+  const deleteTask = (id: number) => {
+    setTasks(tasks.filter((task) => task.id !== id))
+  }
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60)
+    const secs = seconds % 60
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
+  }
+
   return (
-    <div className="grid min-h-screen grid-rows-[20px_1fr_20px] items-center justify-items-center gap-16 p-8 pb-20 font-[family-name:var(--font-geist-sans)] sm:p-20">
-      <main className="row-start-2 flex flex-col items-center gap-8 sm:items-start">
-        <Image className="dark:invert" src="/next.svg" alt="Next.js logo" width={180} height={38} priority />
-        <ol className="list-inside list-decimal text-center font-[family-name:var(--font-geist-mono)] text-sm sm:text-left">
-          <li className="mb-2">
-            Get started by editing{' '}
-            <code className="rounded bg-black/[.05] px-1 py-0.5 font-semibold dark:bg-white/[.06]">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className="flex flex-col items-center gap-4 sm:flex-row">
-          <a
-            className="flex h-10 items-center justify-center gap-2 rounded-full border border-solid border-transparent bg-foreground px-4 text-sm text-background transition-colors hover:bg-[#383838] sm:h-12 sm:px-5 sm:text-base dark:hover:bg-[#ccc]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image className="dark:invert" src="/vercel.svg" alt="Vercel logomark" width={20} height={20} />
-            Deploy now
-          </a>
-          <a
-            className="flex h-10 items-center justify-center rounded-full border border-solid border-black/[.08] px-4 text-sm transition-colors hover:border-transparent hover:bg-[#f2f2f2] sm:h-12 sm:min-w-44 sm:px-5 sm:text-base dark:border-white/[.145] dark:hover:bg-[#1a1a1a]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex flex-wrap items-center justify-center gap-6">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image aria-hidden src="/file.svg" alt="File icon" width={16} height={16} />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image aria-hidden src="/window.svg" alt="Window icon" width={16} height={16} />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image aria-hidden src="/globe.svg" alt="Globe icon" width={16} height={16} />
-          Go to nextjs.org →
-        </a>
-      </footer>
+    <div className="container mx-auto max-w-2xl p-4">
+      <h1 className="mb-4 text-2xl font-bold">タイムボックス TODO</h1>
+      <div className="mb-4 flex gap-2">
+        <Input
+          type="text"
+          placeholder="タスク名"
+          value={newTaskTitle}
+          onChange={(e) => setNewTaskTitle(e.target.value)}
+        />
+        <Input
+          type="number"
+          placeholder="時間（分）"
+          value={newTaskDuration}
+          onChange={(e) => setNewTaskDuration(e.target.value)}
+        />
+        <Button onClick={addTask}>
+          <PlusIcon className="mr-2 h-4 w-4" /> 追加
+        </Button>
+      </div>
+      <div className="space-y-4">
+        {tasks.map((task) => (
+          <Card key={task.id}>
+            <CardHeader>
+              <CardTitle>{task.title}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <div>
+                  残り時間: {formatTime(task.remainingTime)} / {formatTime(task.duration)}
+                </div>
+                <div className="space-x-2">
+                  {task.status !== 'completed' && (
+                    <>
+                      {task.status !== 'running' ? (
+                        <Button size="sm" onClick={() => updateTaskStatus(task.id, 'running')}>
+                          <PlayIcon className="h-4 w-4" />
+                        </Button>
+                      ) : (
+                        <Button size="sm" onClick={() => updateTaskStatus(task.id, 'paused')}>
+                          <PauseIcon className="h-4 w-4" />
+                        </Button>
+                      )}
+                      <Button size="sm" onClick={() => updateTaskStatus(task.id, 'completed')}>
+                        <CheckIcon className="h-4 w-4" />
+                      </Button>
+                    </>
+                  )}
+                  <Button size="sm" variant="destructive" onClick={() => deleteTask(task.id)}>
+                    <TrashIcon className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
     </div>
   )
 }
